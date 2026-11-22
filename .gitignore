@@ -1,0 +1,6 @@
+# generated from GitHub secrets by the publish workflow — never commit it
+js/config.js
+.DS_Store
+# local tooling (machine-specific paths, design scratch files)
+.claude/
+.impeccable/

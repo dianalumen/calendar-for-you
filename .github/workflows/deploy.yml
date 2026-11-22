@@ -1,0 +1,68 @@
+# Publishes the app to GitHub Pages on every push to main.
+# Database settings come from repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL       — the Supabase project URL
+#   SUPABASE_ANON_KEY  — the public "anon"/"publishable" key (NEVER the service_role/secret key)
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create the config file from secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Missing SUPABASE_URL or SUPABASE_ANON_KEY repository secret."
+            exit 1
+          fi
+          # safety check: a secret key (service_role / sb_secret_) must never reach the browser
+          if python3 - "$SUPABASE_ANON_KEY" <<'PY'
+          import sys, base64, json
+          k = sys.argv[1]
+          if k.startswith("sb_secret_"): sys.exit(0)
+          try:
+              p = k.split(".")[1]; p += "=" * (-len(p) % 4)
+              sys.exit(0 if json.loads(base64.urlsafe_b64decode(p)).get("role") == "service_role" else 1)
+          except Exception:
+              sys.exit(1)
+          PY
+          then
+            echo "::error::This is a secret key (service_role/secret). Use the public anon/publishable key instead."
+            exit 1
+          fi
+          printf "export const SUPABASE_URL = %s;\nexport const SUPABASE_ANON_KEY = %s;\n" \
+            "$(jq -Rn --arg v "$SUPABASE_URL" '$v')" "$(jq -Rn --arg v "$SUPABASE_ANON_KEY" '$v')" > js/config.js
+
+      - name: Collect the site files
+        run: |
+          mkdir _site
+          cp -r index.html manifest.webmanifest sw.js css js icons _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
