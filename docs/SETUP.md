@@ -18,22 +18,12 @@ Everything below uses free plans. It takes about 30 minutes and you only do it o
    - Data access: tick **Enable Data API** and **Enable RLS on new tables automatically**. Leave **Grant API access to new tables automatically** unticked, because `schema.sql` grants exactly the access the app needs.
    - Click **Create new project** and wait about 2 minutes.
 3. **Tables and security:** open **SQL Editor** → **New query**, paste the whole contents of `supabase/schema.sql` and click **Run**. You should see "Success. No rows returned".
-4. **Your own email sender (SMTP):** Supabase only lets you edit email templates after you connect your own sender, and its built-in sender only delivers to members of your Supabase organization. Any free SMTP service works. Two easy options:
-   - **Gmail:** turn on 2-Step Verification for the Google account, then create an app password at myaccount.google.com/apppasswords.
-     Settings: host `smtp.gmail.com`, port `465`, username = the Gmail address, password = the 16-character app password, sender email = the same Gmail address.
-   - **Brevo** (free, 300 emails/day): create an account, verify a sender email address, then copy the SMTP host, port, login and SMTP key from **SMTP & API**.
-
-   In Supabase go to **Authentication** → **Emails** → **SMTP Settings**, turn on **Enable custom SMTP**, fill in the values above, set sender name `Calendar for You`, and save.
-   Under **Authentication** → **Rate Limits** you can raise the email limit (the default of a few per hour is enough for two people).
-5. **Sign-in with an email code:** go to **Authentication** → **Emails** → **Templates**.
-   - Open the **Magic Link** template, switch to **Source** and replace its body with:
-     ```html
-     <h2>Calendar for You</h2>
-     <p>Your sign-in code / Twój kod logowania: <strong style="font-size:24px">{{ .Token }}</strong></p>
-     <p>The code is valid for one hour.</p>
-     ```
-   - Paste the same into the **Confirm signup** template, because that one is sent on the very first sign-in.
-   - Save both.
+4. **Accounts:** the app has no public sign-up. You create both accounts yourself, so no email sending is needed.
+   - Go to **Authentication** → **Users** → **Add user** → **Create new user**.
+   - Enter the email address and a password, tick **Auto Confirm User**, and click **Create user**.
+   - Repeat for your partner.
+   - To change a forgotten password later, open the user in the same list and set a new one.
+5. **Turn off public sign-up:** go to **Authentication** → **Sign In / Providers** and switch off **Allow new users to sign up**. Then nobody else can create an account in your app.
 6. **App address:** go to **Authentication** → **URL Configuration** and set **Site URL** to the address from Part 2, step 5.
 7. **Values to copy:** go to **Project Settings** → **API Keys**. You need:
    - the **Project URL** (looks like `https://<project-id>.supabase.co`; it is also shown under **Data API**);
@@ -59,7 +49,7 @@ Everything below uses free plans. It takes about 30 minutes and you only do it o
 2. Add the app to the home screen:
    - iPhone: **Share** → **Add to Home Screen**;
    - Android: menu **⋮** → **Install app** (or **Add to Home screen**).
-3. Open the app from its icon, enter your email, then the code from the email, then your name.
+3. Open the app from its icon, sign in with your email and password, then enter your name.
 4. One person opens **Settings** → **Partner** → **Create a code for your partner**. The other person enters that code in the same place on their phone.
 
 Done. Each person has their own account, and both of you see the shared events.
@@ -68,6 +58,7 @@ Done. Each person has their own account, and both of you see the shared events.
 
 ### Troubleshooting
 
-- **The code doesn't arrive:** check the spam folder. Check the SMTP settings (Part 1, step 4). Wait a moment, because the hourly email limit applies.
+- **"Wrong email or password":** check the account in **Authentication** → **Users**, and set a new password there if needed.
+- **"Account not confirmed":** open the user in **Authentication** → **Users** and confirm it, or recreate it with **Auto Confirm User** ticked.
 - **The publish run in Actions is red:** open it and read the message. Usually a secret is missing or the wrong key was used.
 - **A phone shows an old version:** fully close the app and open it again.

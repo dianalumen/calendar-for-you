@@ -16,7 +16,7 @@ const freeTogether = (ds) => freeTogetherState(store.get(), ds);
 
 const ui = {
   screen: 'loading', // loading | login | name | app
-  login: { step: 'email', email: '', error: '', busy: false },
+  login: { email: '', error: '', busy: false },
   tab: 'calendar',
   selected: ymd(new Date()),
   month: (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })(),
@@ -90,21 +90,16 @@ function loginView() {
   return `<div class="center-screen">
     <img src="icons/icon.svg" alt="" width="72" height="72" class="logo">
     <h1>${t('appName')}</h1>
-    ${l.step === 'email' ? `
-      <p class="hint">${t('login.intro')}</p>
-      <form class="login-form" data-form="email">
-        <label class="sr" for="l-email">${t('login.emailLabel')}</label>
-        <input id="l-email" type="email" name="email" autocomplete="email" inputmode="email" placeholder="${t('login.emailPlaceholder')}" value="${esc(l.email)}" required>
-        <button class="btn primary" ${l.busy ? 'disabled' : ''}>${l.busy ? t('login.sending') : t('login.send')}</button>
-      </form>` : `
-      <p class="hint">${t('login.codeIntro', { email: `<b>${esc(l.email)}</b>` })}</p>
-      <form class="login-form" data-form="code">
-        <label class="sr" for="l-code">${t('login.codeLabel')}</label>
-        <input id="l-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" placeholder="123456" required class="code-input">
-        <button class="btn primary" ${l.busy ? 'disabled' : ''}>${l.busy ? t('login.checking') : t('login.signIn')}</button>
-        <button type="button" class="text-btn" data-back>${t('login.back')}</button>
-      </form>`}
+    <p class="hint">${t('login.intro')}</p>
+    <form class="login-form">
+      <label class="sr" for="l-email">${t('login.emailLabel')}</label>
+      <input id="l-email" type="email" name="email" autocomplete="username" inputmode="email" placeholder="${t('login.emailPlaceholder')}" value="${esc(l.email)}" required>
+      <label class="sr" for="l-password">${t('login.passwordLabel')}</label>
+      <input id="l-password" type="password" name="password" autocomplete="current-password" placeholder="${t('login.passwordLabel')}" required>
+      <button class="btn primary" ${l.busy ? 'disabled' : ''}>${l.busy ? t('login.checking') : t('login.signIn')}</button>
+    </form>
     ${l.error ? `<p class="error" role="alert">${esc(l.error)}</p>` : ''}
+    <p class="hint small">${t('login.noAccount')}</p>
     <div class="lang-corner">${languagePicker('l-lang')}</div>
   </div>`;
 }
@@ -115,25 +110,17 @@ function bindLogin() {
   const f = $app.querySelector('form');
   f.onsubmit = async (ev) => {
     ev.preventDefault();
+    l.email = f.elements.email.value.trim();
+    const password = f.elements.password.value;
     l.error = ''; l.busy = true;
+    render();
     try {
-      if (f.dataset.form === 'email') {
-        l.email = f.elements.email.value.trim();
-        render();
-        await store.sendCode(l.email);
-        l.step = 'code';
-      } else {
-        const code = f.elements.code.value;
-        render();
-        ui.screen = await store.verifyCode(l.email, code) === 'name' ? 'name' : 'app';
-      }
+      ui.screen = await store.signIn(l.email, password) === 'name' ? 'name' : 'app';
     } catch (err) { l.error = err.message; }
     l.busy = false;
     render();
-    $app.querySelector('input')?.focus();
+    if (ui.screen === 'login') $app.querySelector(l.email ? '#l-password' : '#l-email')?.focus();
   };
-  const back = $app.querySelector('[data-back]');
-  if (back) back.onclick = () => { l.step = 'email'; l.error = ''; render(); };
 }
 
 function nameView() {
@@ -558,7 +545,7 @@ function bind() {
   act('logout', async () => {
     if (!confirm(t('confirm.logout'))) return;
     await run(() => store.signOut());
-    ui.screen = 'login'; ui.login = { step: 'email', email: '', error: '', busy: false };
+    ui.screen = 'login'; ui.login = { email: '', error: '', busy: false };
     render();
   });
   act('invite', () => run(() => store.createInvite()));

@@ -4,7 +4,7 @@ A phone calendar for two people. It has private and shared events, yearly birthd
 
 ## Features
 
-- **Separate accounts:** sign in with a one-time code sent by email (no passwords), then connect with your partner using an invite code.
+- **Separate accounts:** sign in with email and password (the owner creates both accounts in Supabase; there is no public sign-up), then connect with your partner using an invite code.
 - **Month view** with a day agenda that shows when you are both free.
 - **Private and shared events**, plus birthdays and anniversaries that repeat every year.
 - **Travel time** there and back (minutes and mode of transport), entered by hand.

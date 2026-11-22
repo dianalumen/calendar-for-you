@@ -35,13 +35,9 @@ export const store = {
     return this.loadCloud();
   },
 
-  // ---------- sign-in with an email code ----------
-  async sendCode(email) {
-    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
-    if (error) throw new Error(friendlyError(error));
-  },
-  async verifyCode(email, token) {
-    const { error } = await sb.auth.verifyOtp({ email, token: token.trim(), type: 'email' });
+  // ---------- sign-in with email and password (accounts are created in the Supabase dashboard) ----------
+  async signIn(email, password) {
+    const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw new Error(friendlyError(error));
     return this.loadCloud();
   },
@@ -206,7 +202,8 @@ function eventToRow(e) {
 
 function friendlyError(err) {
   const m = err?.message || String(err);
-  if (/expired|invalid.*(otp|token)|token.*(expired|invalid)/i.test(m)) return t('error.codeInvalid');
+  if (/invalid login credentials|invalid_credentials/i.test(m)) return t('error.badLogin');
+  if (/email not confirmed/i.test(m)) return t('error.notConfirmed');
   if (/rate limit|too many/i.test(m)) return t('error.rateLimit');
   if (/Failed to fetch|NetworkError|network/i.test(m)) return t('error.offline');
   // errors raised by the database functions in supabase/schema.sql

@@ -272,8 +272,8 @@ body.no-tabs { padding-bottom: 0; }
   border: 1px solid var(--line); background: var(--bg-2); border-radius: 12px; padding: 14px 16px; font-size: 17px; text-align: center;
 }
 .login-form input:focus { border-color: var(--me); outline: none; box-shadow: 0 0 0 3px var(--me-soft); }
-.code-input { font-size: 26px !important; letter-spacing: 0.3em; font-weight: 600; }
 .btn:disabled { opacity: .6; }
+.center-screen .hint.small { font-size: 13px; color: var(--ink-3); margin: 20px 0 0; }
 .error { color: var(--danger); font-size: 14px; margin-top: 16px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .lang-corner { margin-top: 32px; display: flex; justify-content: center; }

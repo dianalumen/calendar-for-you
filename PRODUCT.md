@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Static HTML/CSS/JavaScript (ES modules, no build step), installable PWA, hosted on GitHub Pages. Backend: Supabase free tier (database, email one-time-code sign-in, row-level security; later edge functions and cron for push notifications). Work-calendar integration is planned through a Google Apps Script bridge installed in each work Google Workspace account. Running costs must stay at zero or close to it, and the project must stay maintainable without a build toolchain.
+Static HTML/CSS/JavaScript (ES modules, no build step), installable PWA, hosted on GitHub Pages. Backend: Supabase free tier (database, email and password sign-in with owner-created accounts, row-level security; later edge functions and cron for push notifications). Work-calendar integration is planned through a Google Apps Script bridge installed in each work Google Workspace account. Running costs must stay at zero or close to it, and the project must stay maintainable without a build toolchain.
 
 ## Users
 
